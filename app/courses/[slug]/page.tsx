@@ -41,11 +41,11 @@ export default async function Page({ params }: PageProps) {
   let centerData = null
 
   try {
-    // 1. Lấy dữ liệu khóa học (Sử dụng ilike để không phân biệt hoa thường)
+    // 1. Lấy dữ liệu khóa học (Hỗ trợ tìm theo Slug hoặc ID làm dự phòng)
     const { data: course, error: courseError } = await supabase
       .from('courses')
       .select('*')
-      .ilike('slug', slug)
+      .or(`slug.ilike.${slug},id.eq.${slug}`)
       .maybeSingle()
 
     if (courseError || !course) {
