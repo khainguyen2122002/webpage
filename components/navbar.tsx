@@ -30,7 +30,7 @@ export function Navbar() {
       setUser(user)
 
       // Center Name
-      const { data: center } = await supabase.from('center_info').select('name').single()
+      const { data: center } = await supabase.from('center_info').select('name').eq('id', '00000000-0000-0000-0000-000000000000').single()
       if (center) setCenterName(center.name.toUpperCase())
     }
     fetchData()

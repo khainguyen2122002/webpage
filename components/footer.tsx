@@ -8,6 +8,7 @@ export async function Footer() {
   const { data: centerInfo } = await supabase
     .from('center_info')
     .select('*')
+    .eq('id', '00000000-0000-0000-0000-000000000000')
     .single()
 
   const year = new Date().getFullYear()

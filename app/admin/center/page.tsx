@@ -9,6 +9,7 @@ export default async function AdminCenterPage() {
   const { data: centerInfo } = await supabase
     .from('center_info')
     .select('*')
+    .eq('id', '00000000-0000-0000-0000-000000000000')
     .single()
 
   return (
