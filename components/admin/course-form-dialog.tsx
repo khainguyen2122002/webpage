@@ -64,7 +64,7 @@ export function CourseFormDialog({
   trigger 
 }: { 
   course?: Course, 
-  trigger?: React.ReactNode 
+  trigger?: React.ReactElement 
 }) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -174,13 +174,15 @@ export function CourseFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button className="bg-primary hover:bg-primary/90 text-white gap-2 h-12 rounded-xl shadow-lg shadow-primary/20">
-            <Plus className="w-5 h-5" /> Thêm khóa học
-          </Button>
-        )}
-      </DialogTrigger>
+      <DialogTrigger
+        render={
+          trigger || (
+            <Button className="bg-primary hover:bg-primary/90 text-white gap-2 h-12 rounded-xl shadow-lg shadow-primary/20">
+              <Plus className="w-5 h-5" /> Thêm khóa học
+            </Button>
+          )
+        }
+      />
       <DialogContent className="max-w-[95vw] lg:max-w-7xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] p-0 border-none shadow-2xl bg-slate-50 selection:bg-secondary/30">
 
         <DialogHeader className="p-8 md:p-12 bg-primary text-white sticky top-0 z-30 flex flex-row items-center justify-between overflow-hidden">
