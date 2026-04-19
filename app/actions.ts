@@ -17,32 +17,28 @@ async function getAdminUser() {
 
 // STORAGE ACTIONS
 async function uploadFile(file: File, path: string) {
-  try {
-    const { supabase } = await getAdminUser()
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${Math.random()}.${fileExt}`
-    const filePath = `${path}/${fileName}`
+  const { supabase } = await getAdminUser()
+  const fileExt = file.name.split('.').pop()
+  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
+  const filePath = `${path}/${fileName}`
 
-    const { error: uploadError } = await supabase.storage
-      .from('edu-storage')
-      .upload(filePath, file)
+  console.log(`[Storage] Uploading to edu-storage/${filePath}`)
 
-    if (uploadError) {
-      if (uploadError.message.toLowerCase().includes('permission') || uploadError.message.toLowerCase().includes('rls')) {
-         throw new Error('Lỗi quyền upload (RLS): Bucket storage chưa được mở quyền public write.')
-      }
-      throw new Error(`Upload lỗi: ${uploadError.message}`)
-    }
+  const { error: uploadError } = await supabase.storage
+    .from('edu-storage')
+    .upload(filePath, file, { upsert: true })
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('edu-storage')
-      .getPublicUrl(filePath)
-
-    return publicUrl
-  } catch (error: any) {
-    console.error('Lỗi uploadFile:', error)
-    throw error
+  if (uploadError) {
+    console.error('[Storage] Upload error raw:', JSON.stringify(uploadError))
+    throw new Error(`Lỗi upload ảnh: ${uploadError.message} (status: ${(uploadError as any).statusCode ?? 'unknown'})`)
   }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('edu-storage')
+    .getPublicUrl(filePath)
+
+  console.log(`[Storage] Upload thành công: ${publicUrl}`)
+  return publicUrl
 }
 
 // AUTH ACTIONS
