@@ -247,23 +247,39 @@ export function CourseFormDialog({
                     />
                   </div>
 
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Mô tả ngắn gọn (Thẻ Card)</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Mô tả giá trị của khóa học trong 2-3 câu..." 
-                            {...field} 
-                            className="min-h-[140px] rounded-[2rem] bg-slate-50/50 border-slate-200 focus:bg-white p-6 leading-relaxed"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Mô tả ngắn gọn (Thẻ Card)</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Mô tả giá trị của khóa học trong 2-3 câu..." 
+                              {...field} 
+                              className="min-h-[140px] rounded-[2rem] bg-slate-50/50 border-slate-200 focus:bg-white p-6 leading-relaxed"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Danh mục hiển thị</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Marketing / Sales / HR..." {...field} className="h-16 rounded-2xl bg-slate-50/50 border-slate-200" />
+                          </FormControl>
+                          <FormMessage />
+                          <p className="text-[10px] text-slate-400 mt-2 font-medium italic">Ví dụ: Kỹ năng mềm, Quản trị nhân sự...</p>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
 
                 {/* SECTION: TEAM & GOALS */}
@@ -389,18 +405,36 @@ export function CourseFormDialog({
                     <h4 className="font-black text-primary uppercase text-[10px] tracking-widest">Tiêu chuẩn kỹ thuật</h4>
                   </div>
 
-                  <FormField
-                    control={form.control}
-                    name="duration"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Thời lượng đào tạo</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ví dụ: 24 buổi / 3 tháng" {...field} className="h-14 rounded-2xl bg-slate-50/50 border-slate-100" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="duration"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-black uppercase text-slate-400 tracking-wider font-bold">Thời lượng</FormLabel>
+                          <FormControl>
+                            <Input placeholder="3 tháng" {...field} className="h-14 rounded-2xl bg-slate-50/50 border-slate-100" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="schedule"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-black uppercase text-secondary tracking-wider font-bold flex items-center gap-1.5">
+                            <Calendar className="w-3 h-3" /> Lịch học
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="2-4-6" {...field} className="h-14 rounded-2xl bg-secondary/5 border-secondary/20" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
                   <FormField
                     control={form.control}
