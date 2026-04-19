@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { GraduationCap, Facebook, Youtube, Mail, Phone, MapPin, MessageCircle } from 'lucide-react'
 import { createClient } from '@/utils/supabase/server'
 
@@ -19,10 +20,21 @@ export async function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand */}
           <div className="space-y-6">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="bg-white p-2 rounded-xl">
-                <GraduationCap className="text-primary w-6 h-6" />
-              </div>
+            <Link href="/" className="flex items-center gap-3">
+              {centerInfo?.logo_url ? (
+                <div className="w-10 h-10 relative rounded-xl overflow-hidden bg-white flex-shrink-0">
+                  <Image
+                    src={centerInfo.logo_url}
+                    alt={centerInfo?.name || 'Logo'}
+                    fill
+                    className="object-contain p-1"
+                  />
+                </div>
+              ) : (
+                <div className="bg-white p-2 rounded-xl">
+                  <GraduationCap className="text-primary w-6 h-6" />
+                </div>
+              )}
               <span className="font-bold text-xl tracking-tight text-white uppercase">
                 {centerInfo?.name || 'EDUCENTER'}
               </span>

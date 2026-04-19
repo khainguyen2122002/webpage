@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { Menu, X, GraduationCap } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -14,6 +15,7 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [centerName, setCenterName] = useState('INSPIRING HR')
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const supabase = createClient()
   const router = useRouter()
 
@@ -29,9 +31,12 @@ export function Navbar() {
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
 
-      // Center Name
-      const { data: center } = await supabase.from('center_info').select('name').eq('id', '00000000-0000-0000-0000-000000000000').single()
-      if (center) setCenterName(center.name.toUpperCase())
+      // Center Name + Logo
+      const { data: center } = await supabase.from('center_info').select('name, logo_url').eq('id', '00000000-0000-0000-0000-000000000000').single()
+      if (center) {
+        setCenterName(center.name.toUpperCase())
+        if (center.logo_url) setLogoUrl(center.logo_url)
+      }
     }
     fetchData()
 
@@ -41,10 +46,9 @@ export function Navbar() {
 
     // Realtime for center name
     const channel = supabase.channel('nav-center').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'center_info' }, (payload) => {
-        if (payload.new.name) {
-          setCenterName(payload.new.name.toUpperCase())
-          router.refresh()
-        }
+        if (payload.new.name) setCenterName(payload.new.name.toUpperCase())
+        if (payload.new.logo_url) setLogoUrl(payload.new.logo_url)
+        router.refresh()
     }).subscribe()
 
     return () => {
@@ -75,9 +79,20 @@ export function Navbar() {
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <div className="bg-primary p-2 rounded-lg">
-            <GraduationCap className="text-secondary w-6 h-6" />
-          </div>
+          {logoUrl ? (
+            <div className="w-9 h-9 relative rounded-lg overflow-hidden bg-primary flex-shrink-0">
+              <Image
+                src={logoUrl}
+                alt={centerName}
+                fill
+                className="object-contain p-0.5"
+              />
+            </div>
+          ) : (
+            <div className="bg-primary p-2 rounded-lg">
+              <GraduationCap className="text-secondary w-6 h-6" />
+            </div>
+          )}
           <span className={cn(
             "font-bold text-xl tracking-tight",
             isScrolled ? "text-foreground" : "text-primary"
