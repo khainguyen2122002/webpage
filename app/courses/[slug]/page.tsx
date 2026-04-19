@@ -41,15 +41,21 @@ export default async function Page({ params }: PageProps) {
   let centerData = null
 
   try {
-    // 1. Lấy dữ liệu khóa học (Hỗ trợ tìm theo Slug hoặc ID làm dự phòng)
-    const { data: course, error: courseError } = await supabase
-      .from('courses')
-      .select('*')
-      .or(`slug.ilike.${slug},id.eq.${slug}`)
-      .maybeSingle()
+    // Kiểm tra định dạng UUID để tránh lỗi crash Postgres
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug)
+    
+    let query = supabase.from('courses').select('*')
+    
+    if (isUuid) {
+      query = query.or(`slug.ilike.${slug},id.eq.${slug}`)
+    } else {
+      query = query.ilike('slug', slug)
+    }
+
+    const { data: course, error: courseError } = await query.maybeSingle()
 
     if (courseError || !course) {
-      console.error('[Course Page] Error fetching course:', courseError)
+      console.error('[Course Page] Course not found:', slug)
       notFound()
     }
     courseData = course

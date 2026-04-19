@@ -169,8 +169,8 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             {featuredCourses.map((course) => (
               <Card key={course.id} className="border-none shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] rounded-[3rem] overflow-hidden group hover:shadow-[0_50px_100px_-20px_rgba(26,67,1,0.15)] transition-all duration-700 bg-white hover:-translate-y-5 border-t border-slate-50 relative">
-                {/* Overlay Link phủ toàn bộ thẻ */}
-                <Link href={`/courses/${course.slug}`} className="absolute inset-0 z-20" aria-label={`Xem chi tiết ${course.title}`} />
+                {/* Overlay Link phủ toàn bộ thẻ - Sử dụng Query Param để có độ tin cậy 100% */}
+                <Link href={`/courses/view?id=${course.id}`} className="absolute inset-0 z-20" aria-label={`Xem chi tiết ${course.title}`} />
                 
                 <div className="relative h-72 overflow-hidden">
                   {course.image_url ? (
