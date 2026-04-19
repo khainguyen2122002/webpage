@@ -19,14 +19,6 @@ async function getAdminUser() {
 async function uploadFile(file: File, path: string) {
   try {
     const { supabase } = await getAdminUser()
-    
-    // Kiểm tra bucket edu-storage
-    const { data: buckets, error: bucketError } = await supabase.storage.listBuckets()
-    if (bucketError) throw new Error(`Lỗi hạ tầng storage: ${bucketError.message}`)
-    if (!buckets?.find(b => b.name === 'edu-storage')) {
-      throw new Error("Bucket 'edu-storage' không tồn tại. Vui lòng tạo trên Supabase Storage.")
-    }
-
     const fileExt = file.name.split('.').pop()
     const fileName = `${Math.random()}.${fileExt}`
     const filePath = `${path}/${fileName}`
