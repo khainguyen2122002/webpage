@@ -19,17 +19,18 @@ export function ContactForm({ courseId, courseTitle }: ContactFormProps) {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    const form = e.currentTarget
     setLoading(true)
     
     try {
-      const formData = new FormData(e.currentTarget)
+      const formData = new FormData(form)
       if (courseId) formData.append('courseId', courseId)
       
       const result = await submitContact(formData)
       if (result?.error) throw new Error(result.error)
       
       toast.success("Cảm ơn " + (formData.get('name') || "") + "! Chúng tôi sẽ liên hệ lại sớm nhất.")
-      e.currentTarget.reset()
+      form.reset()
     } catch (error: any) {
       toast.error("Lỗi: " + error.message)
     } finally {
