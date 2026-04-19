@@ -26,6 +26,7 @@ import { updateCenterInfo } from "@/app/actions"
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { createClient } from '@/utils/supabase/client'
 
 const formSchema = z.object({
   name: z.string().min(2, "Tên trung tâm quá ngắn"),
