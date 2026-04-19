@@ -59,20 +59,9 @@ export async function updateCenterInfo(formData: FormData) {
   try {
     const { supabase } = await getAdminUser()
 
-    let logoUrl = formData.get('logoUrl') as string
-    let bannerUrl = formData.get('bannerUrl') as string
-
-    // Handle Logo Upload
-    const logoFile = formData.get('logoFile') as File
-    if (logoFile && logoFile.size > 0) {
-      logoUrl = await uploadFile(logoFile, 'center')
-    }
-
-    // Handle Banner Upload
-    const bannerFile = formData.get('bannerFile') as File
-    if (bannerFile && bannerFile.size > 0) {
-      bannerUrl = await uploadFile(bannerFile, 'center')
-    }
+    // Logo/Banner URLs - dùng trực tiếp URL từ form (không upload file nữa)
+    const logoUrl = formData.get('logoUrl') as string || ''
+    const bannerUrl = formData.get('bannerUrl') as string || ''
 
     // Kiểm tra cột bảng
     const updates = {

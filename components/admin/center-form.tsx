@@ -38,6 +38,8 @@ const formSchema = z.object({
   zaloUrl: z.string().optional(),
   facebookUrl: z.string().optional(),
   mapUrl: z.string().url("Link bản đồ không hợp lệ").optional().or(z.literal('')),
+  logoUrl: z.string().optional(),
+  bannerUrl: z.string().optional(),
   statsCourses: z.coerce.number().min(0),
   statsStudents: z.coerce.number().min(0),
   statsRating: z.coerce.number().min(0).max(5),
@@ -54,13 +56,6 @@ const formSchema = z.object({
 
 export function CenterForm({ initialData }: { initialData: CenterInfo | null }) {
   const [loading, setLoading] = useState(false)
-  const [logoFile, setLogoFile] = useState<File | null>(null)
-  const [bannerFile, setBannerFile] = useState<File | null>(null)
-  const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logo_url || null)
-  const [bannerPreview, setBannerPreview] = useState<string | null>(initialData?.banner_url || null)
-  // Track saved URLs separately so previews persist across router.refresh()
-  const [savedLogoUrl, setSavedLogoUrl] = useState<string | null>(initialData?.logo_url || null)
-  const [savedBannerUrl, setSavedBannerUrl] = useState<string | null>(initialData?.banner_url || null)
   const router = useRouter()
 
   const formValues = React.useMemo(() => {
@@ -75,6 +70,8 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
       zaloUrl: initialData.zalo_url || "",
       facebookUrl: initialData.facebook_url || "",
       mapUrl: initialData.map_url || "",
+      logoUrl: initialData.logo_url || "",
+      bannerUrl: initialData.banner_url || "",
       statsCourses: Number(initialData.stats_courses ?? 50),
       statsStudents: Number(initialData.stats_students ?? 12000),
       statsRating: Number(initialData.stats_rating ?? 4.9),
@@ -94,19 +91,9 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
     resolver: zodResolver(formSchema) as any,
     values: formValues,
     defaultValues: {
-      name: "",
-      slogan: "",
-      description: "",
-      address: "",
-      phone: "",
-      email: "",
-      zaloUrl: "",
-      facebookUrl: "",
-      mapUrl: "",
-      statsCourses: 50,
-      statsStudents: 12000,
-      statsRating: 4.9,
-      showStats: false,
+      name: "", slogan: "", description: "", address: "", phone: "", email: "",
+      zaloUrl: "", facebookUrl: "", mapUrl: "", logoUrl: "", bannerUrl: "",
+      statsCourses: 50, statsStudents: 12000, statsRating: 4.9, showStats: false,
       heroBadgeText: "Chào mừng bạn đến với EduCenter",
       ctaPrimaryText: "Khám phá khóa học",
       ctaSecondaryText: "Tư vấn ngay",
@@ -118,30 +105,9 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
     }
   })
 
-  useEffect(() => {
-    // Always sync preview with latest server data when initialData changes
-    if (initialData?.logo_url) {
-      setSavedLogoUrl(initialData.logo_url)
-      if (!logoFile) setLogoPreview(initialData.logo_url)
-    }
-    if (initialData?.banner_url) {
-      setSavedBannerUrl(initialData.banner_url)
-      if (!bannerFile) setBannerPreview(initialData.banner_url)
-    }
-  }, [initialData, logoFile, bannerFile])
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'banner') => {
-    const file = e.target.files?.[0]
-    if (file) {
-      if (type === 'logo') {
-        setLogoFile(file)
-        setLogoPreview(URL.createObjectURL(file))
-      } else {
-        setBannerFile(file)
-        setBannerPreview(URL.createObjectURL(file))
-      }
-    }
-  }
+  // Watch URL fields for live preview
+  const watchedLogoUrl = form.watch('logoUrl')
+  const watchedBannerUrl = form.watch('bannerUrl')
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true)
@@ -152,20 +118,12 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
           formData.append(key, String(value))
         }
       })
-      
-      if (logoFile) formData.append('logoFile', logoFile)
-      if (bannerFile) formData.append('bannerFile', bannerFile)
-      // Pass current saved URLs as fallback if no new file uploaded
-      formData.append('logoUrl', savedLogoUrl || '')
-      formData.append('bannerUrl', savedBannerUrl || '')
-      
+      // Map camelCase fields to snake_case keys server expects
+      formData.set('logoUrl', values.logoUrl || '')
+      formData.set('bannerUrl', values.bannerUrl || '')
+
       const result = await updateCenterInfo(formData)
       if (result?.error) throw new Error(result.error)
-
-      // Clear file inputs after successful save
-      setLogoFile(null)
-      setBannerFile(null)
-
       toast.success("Cập nhật thành công!")
       router.refresh()
     } catch (error: any) {
@@ -351,47 +309,93 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
                 />
               </TabsContent>
 
-              <TabsContent value="media" className="mt-0 space-y-12">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                  <div className="space-y-4">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                      <ImageIcon className="w-4 h-4 text-secondary" /> Logo trung tâm
-                    </label>
-                    <div className="relative aspect-square w-40 rounded-3xl overflow-hidden border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center group">
-                      {logoPreview ? (
-                        <Image src={logoPreview} alt="Logo preview" fill className="object-contain p-4" />
-                      ) : (
-                        <ImageIcon className="w-10 h-10 text-slate-200" />
-                      )}
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={(e) => handleFileChange(e, 'logo')}
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                      />
+              <TabsContent value="media" className="mt-0 space-y-10">
+                {/* Logo URL */}
+                <div className="space-y-4">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4 text-secondary" /> Logo trung tâm (URL)
+                  </label>
+                  <FormField
+                    control={form.control}
+                    name="logoUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            placeholder="https://i.imgur.com/abc.png hoặc link Google Drive..."
+                            {...field}
+                            className="h-12 rounded-xl font-mono text-sm"
+                          />
+                        </FormControl>
+                        <p className="text-xs text-slate-400">Dán URL ảnh trực tiếp vào ô. Ảnh sẽ hiện ngay phía dưới.</p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {/* Live Preview */}
+                  {watchedLogoUrl && (
+                    <div className="flex items-start gap-4">
+                      <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-slate-100 bg-slate-50 flex-shrink-0">
+                        <img
+                          src={watchedLogoUrl}
+                          alt="Logo preview"
+                          className="w-full h-full object-contain p-2"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                        />
+                      </div>
+                      <div className="text-xs text-slate-400 space-y-1 pt-2">
+                        <p className="font-bold text-green-600">✅ Đang xem trước logo</p>
+                        <p>Nếu không hiện ảnh, kiểm tra URL có đúng dạng https:// không.</p>
+                      </div>
                     </div>
-                    <p className="text-xs text-slate-400">Khuyên dùng: Ảnh vuông, nền trong suốt (PNG).</p>
-                  </div>
+                  )}
+                </div>
 
-                  <div className="space-y-4">
-                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                      <ImageIcon className="w-4 h-4 text-secondary" /> Banner mặc định
-                    </label>
-                    <div className="relative aspect-video w-full rounded-3xl overflow-hidden border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center group">
-                      {bannerPreview ? (
-                        <Image src={bannerPreview} alt="Banner preview" fill className="object-cover" />
-                      ) : (
-                        <ImageIcon className="w-12 h-12 text-slate-200" />
-                      )}
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={(e) => handleFileChange(e, 'banner')}
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                      />
+                {/* Banner URL */}
+                <div className="space-y-4">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4 text-secondary" /> Banner trang chủ (URL)
+                  </label>
+                  <FormField
+                    control={form.control}
+                    name="bannerUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            placeholder="https://images.unsplash.com/... hoặc link ảnh bất kỳ..."
+                            {...field}
+                            className="h-12 rounded-xl font-mono text-sm"
+                          />
+                        </FormControl>
+                        <p className="text-xs text-slate-400">Khuyến dùng: Unsplash, Imgur. Kích thước ích nhất 1920×1080.</p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {/* Live Preview */}
+                  {watchedBannerUrl && (
+                    <div className="space-y-2">
+                      <div className="relative aspect-video w-full rounded-2xl overflow-hidden border-2 border-slate-100 bg-slate-50">
+                        <img
+                          src={watchedBannerUrl}
+                          alt="Banner preview"
+                          className="w-full h-full object-cover"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                        />
+                      </div>
+                      <p className="text-xs text-green-600 font-bold">✅ Đang xem trước banner</p>
                     </div>
-                    <p className="text-xs text-slate-400">Khuyên dùng: Kích thước 1920x1080 (16:9).</p>
-                  </div>
+                  )}
+                </div>
+
+                <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 text-sm text-blue-700 space-y-2">
+                  <p className="font-bold">💡 Hướng dẫn lấy URL ảnh:</p>
+                  <ul className="space-y-1 list-disc list-inside text-blue-600">
+                    <li><strong>Imgur:</strong> Upload ảnh tại imgur.com → chuột phải ảnh → Copy Image Address</li>
+                    <li><strong>Unsplash:</strong> Tìm ảnh ở unsplash.com → Copy Link ảnh</li>
+                    <li><strong>Google Photos:</strong> Chia sẻ ảnh → Lấy link</li>
+                  </ul>
                 </div>
               </TabsContent>
 
