@@ -154,7 +154,8 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
       }
     }
     loadFreshData()
-  }, [initialData, form, logoFile, bannerFile])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'banner') => {
     const file = e.target.files?.[0]
