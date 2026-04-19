@@ -87,7 +87,10 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
   })
 
   useEffect(() => {
-    if (initialData) {
+    async function loadFreshData() {
+      if (!initialData) return
+      
+      // Khởi tạo trước bằng state được nhồi sẵn
       form.reset({
         name: initialData.name || "",
         slogan: initialData.slogan || "",
@@ -107,13 +110,49 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
         ctaSecondaryText: initialData.cta_secondary_text || "Tư vấn ngay",
         ctaSecondaryUrl: initialData.cta_secondary_url || "/contact",
         communityTitle: initialData.community_title || "Cộng đồng",
-        communityText: initialData.community_text || "Gia nhập cộng đồng HR hơn 12,000 học viên đã thành công.",
+        communityText: initialData.community_text || "Gia nhập cộng đồng HR",
         internationalTitle: initialData.international_title || "Tiêu chuẩn quốc tế",
-        internationalText: initialData.international_text || "Chương trình đào tạo chuẩn quốc tế với đội ngũ chuyên gia.",
+        internationalText: initialData.international_text || "Chương trình đào tạo chuẩn quốc tế",
       })
       if (initialData.logo_url && !logoFile) setLogoPreview(initialData.logo_url)
       if (initialData.banner_url && !bannerFile) setBannerPreview(initialData.banner_url)
+
+      try {
+         // Luôn fetch lại từ DB thật để đảm bảo không bị kẹt Router Cache cũ Next.js
+         const supabase = createClient()
+         const { data: freshData } = await supabase.from('center_info').select('*').single()
+         if (freshData) {
+            form.reset({
+              name: freshData.name || "",
+              slogan: freshData.slogan || "",
+              description: freshData.description || "",
+              address: freshData.address || "",
+              phone: freshData.phone || "",
+              email: freshData.email || "",
+              zaloUrl: freshData.zalo_url || "",
+              facebookUrl: freshData.facebook_url || "",
+              mapUrl: freshData.map_url || "",
+              statsCourses: Number(freshData.stats_courses ?? 50),
+              statsStudents: Number(freshData.stats_students ?? 12000),
+              statsRating: Number(freshData.stats_rating ?? 4.9),
+              showStats: Boolean(freshData.show_stats ?? false),
+              heroBadgeText: freshData.hero_badge_text || "Chào mừng bạn đến với EduCenter",
+              ctaPrimaryText: freshData.cta_primary_text || "Khám phá khóa học",
+              ctaSecondaryText: freshData.cta_secondary_text || "Tư vấn ngay",
+              ctaSecondaryUrl: freshData.cta_secondary_url || "/contact",
+              communityTitle: freshData.community_title || "Cộng đồng",
+              communityText: freshData.community_text || "Gia nhập cộng đồng HR",
+              internationalTitle: freshData.international_title || "Tiêu chuẩn quốc tế",
+              internationalText: freshData.international_text || "Chương trình đào tạo chuẩn quốc tế",
+            })
+            if (freshData.logo_url && !logoFile) setLogoPreview(freshData.logo_url)
+            if (freshData.banner_url && !bannerFile) setBannerPreview(freshData.banner_url)
+         }
+      } catch (err) {
+         console.error('Lỗi khi fetch data mới nhất:', err)
+      }
     }
+    loadFreshData()
   }, [initialData, form, logoFile, bannerFile])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'banner') => {

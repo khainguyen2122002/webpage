@@ -1,66 +1,32 @@
-'use client'
-
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, BookOpen, Users, Award, CheckCircle2, Star, Sparkles, PhoneCall, Clock, Layers, Loader2, Globe } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { ArrowRight, BookOpen, Users, Award, CheckCircle2, Star, Sparkles, PhoneCall, Clock, Layers, Globe } from 'lucide-react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { createClient } from '@/utils/supabase/client'
+import { createClient } from '@/utils/supabase/server'
 import { Course, CenterInfo } from '@/types'
 
-export default function Home() {
-  const [centerInfo, setCenterInfo] = useState<CenterInfo | null>(null)
-  const [featuredCourses, setFeaturedCourses] = useState<Course[]>([])
-  const [loading, setLoading] = useState(true)
-  const supabase = createClient()
-  const router = useRouter()
+export const dynamic = 'force-dynamic'
 
-  useEffect(() => {
-    async function fetchData() {
-      const { data: centerData } = await supabase
-        .from('center_info')
-        .select('*')
-        .single()
+export default async function Home() {
+  const supabase = await createClient()
 
-      const { data: coursesData } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('is_featured', true)
-        .limit(3)
+  const { data: centerData } = await supabase
+    .from('center_info')
+    .select('*')
+    .eq('id', '00000000-0000-0000-0000-000000000000')
+    .single()
 
-      if (centerData) setCenterInfo(centerData as CenterInfo)
-      if (coursesData) setFeaturedCourses(coursesData as Course[])
-      setLoading(false)
-    }
-    fetchData()
+  const { data: coursesData } = await supabase
+    .from('courses')
+    .select('*')
+    .eq('is_featured', true)
+    .limit(3)
 
-    // Realtime sync
-    const channel = supabase
-      .channel('home-data')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'center_info' }, (payload) => {
-        setCenterInfo(payload.new as CenterInfo)
-        router.refresh()
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'courses' }, (payload) => {
-        fetchData() // Refresh everything if courses change
-        router.refresh()
-      })
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [])
-
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-white font-black">
-       <Loader2 className="w-12 h-12 text-primary animate-spin" />
-    </div>
-  )
+  const centerInfo = centerData as CenterInfo
+  const featuredCourses = (coursesData as Course[]) || []
 
   return (
     <div className="flex flex-col min-h-screen bg-white">

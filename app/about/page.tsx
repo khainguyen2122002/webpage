@@ -1,12 +1,11 @@
-'use client'
-
-import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Target, Heart, Shield, Sparkles, MapPin, Phone, Mail, Loader2, Award, Users, Rocket } from 'lucide-react'
+import { Target, Heart, Shield, Sparkles, MapPin, Phone, Mail, Award, Users, Rocket } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { createClient } from '@/utils/supabase/client'
+import { createClient } from '@/utils/supabase/server'
 import { CenterInfo } from '@/types'
+
+export const dynamic = 'force-dynamic'
 
 const values = [
   {
@@ -49,41 +48,16 @@ const team = [
   }
 ]
 
-export default function AboutPage() {
-  const [centerInfo, setCenterInfo] = useState<CenterInfo | null>(null)
-  const [loading, setLoading] = useState(true)
-  const supabase = createClient()
+export default async function AboutPage() {
+  const supabase = await createClient()
 
-  useEffect(() => {
-    async function fetchData() {
-      const { data } = await supabase
-        .from('center_info')
-        .select('*')
-        .single()
-      
-      if (data) setCenterInfo(data as CenterInfo)
-      setLoading(false)
-    }
-    fetchData()
+  const { data: centerData } = await supabase
+    .from('center_info')
+    .select('*')
+    .eq('id', '00000000-0000-0000-0000-000000000000')
+    .single()
 
-    // Realtime sync
-    const channel = supabase
-      .channel('about-data')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'center_info' }, (payload) => {
-        setCenterInfo(payload.new as CenterInfo)
-      })
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [])
-
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-       <Loader2 className="w-12 h-12 text-primary animate-spin" />
-    </div>
-  )
+  const centerInfo = centerData as CenterInfo
 
   return (
     <div className="flex flex-col gap-32 pb-32 bg-white">
