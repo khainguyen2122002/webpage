@@ -80,12 +80,14 @@ export function Navbar() {
       <div className="container mx-auto px-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           {logoUrl ? (
-            <div className="w-9 h-9 relative rounded-lg overflow-hidden bg-primary flex-shrink-0">
-              <Image
+            <div className="w-9 h-9 relative rounded-lg overflow-hidden bg-primary flex-shrink-0 flex items-center justify-center">
+              <img
                 src={logoUrl}
                 alt={centerName}
-                fill
-                className="object-contain p-0.5"
+                className="w-full h-full object-contain p-0.5"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).parentElement!.innerHTML = '<div class="bg-primary p-2 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-secondary w-6 h-6"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>';
+                }}
               />
             </div>
           ) : (

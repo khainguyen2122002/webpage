@@ -56,6 +56,10 @@ const formSchema = z.object({
 
 export function CenterForm({ initialData }: { initialData: CenterInfo | null }) {
   const [loading, setLoading] = useState(false)
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string>(initialData?.logo_url || '')
+  const [bannerPreviewUrl, setBannerPreviewUrl] = useState<string>(initialData?.banner_url || '')
+  const [logoImgError, setLogoImgError] = useState(false)
+  const [bannerImgError, setBannerImgError] = useState(false)
   const router = useRouter()
 
   const formValues = React.useMemo(() => {
@@ -105,9 +109,11 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
     }
   })
 
-  // Watch URL fields for live preview
-  const watchedLogoUrl = form.watch('logoUrl')
-  const watchedBannerUrl = form.watch('bannerUrl')
+  // Sync preview URLs with latest server data when initialData changes
+  useEffect(() => {
+    if (initialData?.logo_url) setLogoPreviewUrl(initialData.logo_url)
+    if (initialData?.banner_url) setBannerPreviewUrl(initialData.banner_url)
+  }, [initialData])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true)
@@ -322,30 +328,47 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
                       <FormItem>
                         <FormControl>
                           <Input
-                            placeholder="https://i.imgur.com/abc.png hoặc link Google Drive..."
+                            placeholder="https://i.imgur.com/abc.png..."
                             {...field}
+                            onChange={(e) => {
+                              field.onChange(e)
+                              setLogoImgError(false)
+                              setLogoPreviewUrl(e.target.value)
+                            }}
                             className="h-12 rounded-xl font-mono text-sm"
                           />
                         </FormControl>
-                        <p className="text-xs text-slate-400">Dán URL ảnh trực tiếp vào ô. Ảnh sẽ hiện ngay phía dưới.</p>
+                        <p className="text-xs text-slate-400">Dán URL ảnh trực tiếp vào ô — ảnh preview xuất hiện ngay bên dưới khi URL hợp lệ.</p>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  {/* Live Preview */}
-                  {watchedLogoUrl && (
+                  {logoPreviewUrl && (
                     <div className="flex items-start gap-4">
-                      <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-slate-100 bg-slate-50 flex-shrink-0">
-                        <img
-                          src={watchedLogoUrl}
-                          alt="Logo preview"
-                          className="w-full h-full object-contain p-2"
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                        />
+                      <div className="relative w-28 h-28 rounded-2xl overflow-hidden border-2 border-slate-100 bg-slate-50 flex-shrink-0 flex items-center justify-center">
+                        {!logoImgError ? (
+                          <img
+                            src={logoPreviewUrl}
+                            alt="Logo preview"
+                            referrerPolicy="no-referrer"
+                            className="w-full h-full object-contain p-2"
+                            onLoad={() => setLogoImgError(false)}
+                            onError={() => setLogoImgError(true)}
+                          />
+                        ) : (
+                          <div className="text-center px-2">
+                            <ImageIcon className="w-8 h-8 text-red-300 mx-auto" />
+                            <p className="text-[10px] text-red-400 mt-1">Không tải được</p>
+                          </div>
+                        )}
                       </div>
-                      <div className="text-xs text-slate-400 space-y-1 pt-2">
-                        <p className="font-bold text-green-600">✅ Đang xem trước logo</p>
-                        <p>Nếu không hiện ảnh, kiểm tra URL có đúng dạng https:// không.</p>
+                      <div className="text-xs space-y-1 pt-2">
+                        {logoImgError ? (
+                          <p className="font-bold text-red-500">⚠️ URL không hiện ảnh được. Thử dùng Imgur.</p>
+                        ) : (
+                          <p className="font-bold text-green-600">✅ Preview logo OK</p>
+                        )}
+                        <p className="text-slate-400">URL: <span className="font-mono break-all">{logoPreviewUrl.slice(0, 50)}...</span></p>
                       </div>
                     </div>
                   )}
@@ -363,38 +386,59 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
                       <FormItem>
                         <FormControl>
                           <Input
-                            placeholder="https://images.unsplash.com/... hoặc link ảnh bất kỳ..."
+                            placeholder="https://images.unsplash.com/photo-xxx?w=1920..."
                             {...field}
+                            onChange={(e) => {
+                              field.onChange(e)
+                              setBannerImgError(false)
+                              setBannerPreviewUrl(e.target.value)
+                            }}
                             className="h-12 rounded-xl font-mono text-sm"
                           />
                         </FormControl>
-                        <p className="text-xs text-slate-400">Khuyến dùng: Unsplash, Imgur. Kích thước ích nhất 1920×1080.</p>
+                        <p className="text-xs text-slate-400">Khuyến dùng: Unsplash, Imgur. Kích thước 1920×1080.</p>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  {/* Live Preview */}
-                  {watchedBannerUrl && (
+                  {bannerPreviewUrl && (
                     <div className="space-y-2">
-                      <div className="relative aspect-video w-full rounded-2xl overflow-hidden border-2 border-slate-100 bg-slate-50">
-                        <img
-                          src={watchedBannerUrl}
-                          alt="Banner preview"
-                          className="w-full h-full object-cover"
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                        />
+                      <div className="relative aspect-video w-full rounded-2xl overflow-hidden border-2 border-slate-100 bg-slate-50 flex items-center justify-center">
+                        {!bannerImgError ? (
+                          <img
+                            src={bannerPreviewUrl}
+                            alt="Banner preview"
+                            referrerPolicy="no-referrer"
+                            className="w-full h-full object-cover"
+                            onLoad={() => setBannerImgError(false)}
+                            onError={() => setBannerImgError(true)}
+                          />
+                        ) : (
+                          <div className="text-center">
+                            <ImageIcon className="w-12 h-12 text-red-200 mx-auto" />
+                            <p className="text-sm text-red-400 mt-2">Không tải được ảnh từ URL này</p>
+                          </div>
+                        )}
                       </div>
-                      <p className="text-xs text-green-600 font-bold">✅ Đang xem trước banner</p>
+                      {bannerImgError ? (
+                        <p className="text-xs text-red-500 font-bold">⚠️ URL này không hợp lệ hoặc bị chặn. Thử link Imgur hoặc Unsplash khác.</p>
+                      ) : (
+                        <p className="text-xs text-green-600 font-bold">✅ Preview banner OK — nhấn Lưu để áp dụng</p>
+                      )}
                     </div>
                   )}
                 </div>
 
-                <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 text-sm text-blue-700 space-y-2">
-                  <p className="font-bold">💡 Hướng dẫn lấy URL ảnh:</p>
-                  <ul className="space-y-1 list-disc list-inside text-blue-600">
-                    <li><strong>Imgur:</strong> Upload ảnh tại imgur.com → chuột phải ảnh → Copy Image Address</li>
-                    <li><strong>Unsplash:</strong> Tìm ảnh ở unsplash.com → Copy Link ảnh</li>
-                    <li><strong>Google Photos:</strong> Chia sẻ ảnh → Lấy link</li>
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-sm text-amber-900 space-y-3">
+                  <p className="font-bold flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" /> HƯỚNG DẪN QUAN TRỌNG:
+                  </p>
+                  <p>Để ảnh hiển thị được, bạn phải lấy <strong>"Địa chỉ hình ảnh"</strong>, không phải link trang web.</p>
+                  <ul className="space-y-2 list-disc list-inside text-amber-800">
+                    <li><strong>Cách làm:</strong> Chuột phải vào ảnh bạn muốn → Chọn <strong>"Sao chép địa chỉ hình ảnh"</strong> (Copy Image Address).</li>
+                    <li><strong>Link đúng:</strong> Thường kết thúc bằng <code>.jpg</code>, <code>.png</code> hoặc có nhiều chữ số.</li>
+                    <li><strong>Link sai:</strong> Link có chữ <code>/photo-xxx</code> mà không có phần mở rộng ảnh thường là link trang web, không dùng được.</li>
+                    <li><strong>Mẹo:</strong> Sau khi dán link, nếu thấy <strong>"✅ Preview OK"</strong> hiện ra bên dưới thì link đó chắc chắn hoạt động.</li>
                   </ul>
                 </div>
               </TabsContent>

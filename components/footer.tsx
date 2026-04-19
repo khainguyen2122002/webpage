@@ -22,12 +22,14 @@ export async function Footer() {
           <div className="space-y-6">
             <Link href="/" className="flex items-center gap-3">
               {centerInfo?.logo_url ? (
-                <div className="w-10 h-10 relative rounded-xl overflow-hidden bg-white flex-shrink-0">
-                  <Image
+                <div className="w-10 h-10 relative rounded-xl overflow-hidden bg-white flex-shrink-0 flex items-center justify-center">
+                  <img
                     src={centerInfo.logo_url}
                     alt={centerInfo?.name || 'Logo'}
-                    fill
-                    className="object-contain p-1"
+                    className="w-full h-full object-contain p-1"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).parentElement!.innerHTML = '<div class="bg-white p-2 rounded-xl"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary w-6 h-6"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>';
+                    }}
                   />
                 </div>
               ) : (
