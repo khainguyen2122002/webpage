@@ -472,6 +472,3 @@ export function CourseFormDialog({
     </Dialog>
   )
 }
-
-  )
-}
