@@ -136,18 +136,18 @@ export async function upsertCourse(formData: FormData) {
       slug: formData.get('slug') as string,
       description: formData.get('description') as string,
       price: Number(formData.get('price')),
-      original_price: formData.get('originalPrice') ? Number(formData.get('originalPrice')) : null,
-      discount_percent: formData.get('discountPercent') ? Number(formData.get('discountPercent')) : null,
-      instructor_name: formData.get('instructorName') as string,
-      instructor_role: formData.get('instructorRole') as string,
-      learning_goals: formData.get('learningGoals') as string,
-      target_audience: formData.get('targetAudience') as string,
-      external_form_url: formData.get('externalFormUrl') as string,
+      original_price: formData.get('original_price') ? Number(formData.get('original_price')) : null,
+      discount_percent: formData.get('discount_percent') ? Number(formData.get('discount_percent')) : null,
+      instructor_name: formData.get('instructor_name') as string,
+      instructor_role: formData.get('instructor_role') as string,
+      learning_goals: formData.get('learning_goals') as string,
+      target_audience: formData.get('target_audience') as string,
+      external_form_url: formData.get('external_form_url') as string,
       duration: formData.get('duration') as string,
       schedule: formData.get('schedule') as string,
       level: formData.get('level') as string,
       category: formData.get('category') as string,
-      is_featured: formData.get('isFeatured') === 'true',
+      is_featured: formData.get('is_featured') === 'true',
       image_url: imageUrl,
       updated_at: new Date().toISOString(),
       content: JSON.parse(formData.get('content') as string || '{"overview":"","curriculum":[]}')
@@ -157,6 +157,7 @@ export async function upsertCourse(formData: FormData) {
       .from('courses')
       .upsert(id ? { id, ...courseData } : courseData)
       .select()
+      .single()
 
     if (error) {
       if (error.code === '42P01') throw new Error('Không tìm thấy bảng courses.')

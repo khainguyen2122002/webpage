@@ -37,55 +37,69 @@ export default async function Page({ params }: PageProps) {
   const supabase = await createClient()
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
+  let courseData = null
+  let centerData = null
+
   try {
-    const { data: courseData, error: courseError } = await supabase
+    // 1. Lấy dữ liệu khóa học (Sử dụng ilike để không phân biệt hoa thường)
+    const { data: course, error: courseError } = await supabase
       .from('courses')
       .select('*')
-      .eq('slug', slug)
-      .single()
+      .ilike('slug', slug)
+      .maybeSingle()
 
-    if (courseError || !courseData) {
+    if (courseError || !course) {
       console.error('[Course Page] Error fetching course:', courseError)
       notFound()
     }
+    courseData = course
 
-    const { data: centerData } = await supabase
-      .from('center_info')
-      .select('*')
-      .eq('id', '00000000-0000-0000-0000-000000000000')
-      .single()
+    // 2. Lấy dữ liệu trung tâm (Nếu lỗi thì vẫn hiện trang khóa học)
+    try {
+      const { data: center } = await supabase
+        .from('center_info')
+        .select('*')
+        .eq('id', '00000000-0000-0000-0000-000000000000')
+        .maybeSingle()
+      centerData = center
+    } catch (e) {
+      console.warn('[Course Page] Center info not found, using defaults.')
+    }
 
     const jsonLd = {
       '@context': 'https://schema.org',
       '@type': 'Course',
       name: courseData.title,
       description: courseData.description,
-    provider: {
-      '@type': 'Organization',
-      name: centerData?.name || 'EduCenter',
-      sameAs: siteUrl
-    },
-    offers: {
-      '@type': 'Offer',
-      price: courseData.price,
-      priceCurrency: 'VND'
+      provider: {
+        '@type': 'Organization',
+        name: centerData?.name || 'EduCenter',
+        sameAs: siteUrl
+      },
+      offers: {
+        '@type': 'Offer',
+        price: courseData.price,
+        priceCurrency: 'VND'
+      }
     }
-  }
 
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <CourseDetailView 
-        initialCourse={courseData as Course} 
-        initialCenterInfo={centerData as CenterInfo} 
-      />
-    </>
-  )
- } catch (error) {
-    console.error('[Course Page] Error:', error)
+    return (
+      <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <CourseDetailView 
+          initialCourse={courseData as Course} 
+          initialCenterInfo={centerData as CenterInfo} 
+        />
+      </>
+    )
+  } catch (error) {
+    if (error instanceof Error && error.message === 'NEXT_NOT_FOUND') {
+      throw error // Re-throw Next.js notFound()
+    }
+    console.error('[Course Page] Critical Error:', error)
     notFound()
- }
+  }
 }
