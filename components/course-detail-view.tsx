@@ -18,6 +18,7 @@ import {
   Loader2,
   Sparkles
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -46,6 +47,7 @@ export function CourseDetailView({
   const [centerInfo, setCenterInfo] = useState<CenterInfo | null>(initialCenterInfo)
   const [formLoading, setFormLoading] = useState(false)
   const supabase = createClient()
+  const router = useRouter()
 
   useEffect(() => {
     // Realtime sync
@@ -58,6 +60,7 @@ export function CourseDetailView({
         filter: `id=eq.${initialCourse.id}` 
       }, (payload) => {
         setCourse(payload.new as Course)
+        router.refresh()
       })
       .on('postgres_changes', { 
         event: 'UPDATE', 
@@ -65,6 +68,7 @@ export function CourseDetailView({
         table: 'center_info' 
       }, (payload) => {
         setCenterInfo(payload.new as CenterInfo)
+        router.refresh()
       })
       .subscribe()
 

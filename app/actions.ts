@@ -125,8 +125,7 @@ export async function updateCenterInfo(formData: FormData) {
       throw new Error(`Cập nhật db thất bại: ${error.message}`)
     }
 
-    revalidatePath('/admin/center')
-    revalidatePath('/')
+    revalidatePath('/', 'layout')
     return { success: true }
   } catch (error: any) {
     console.error('[Action Error] updateCenterInfo:', error)
@@ -172,8 +171,7 @@ export async function upsertCourse(formData: FormData) {
       throw new Error(`Cập nhật khóa học lỗi: ${error.message}`)
     }
 
-    revalidatePath('/admin/courses')
-    revalidatePath('/courses')
+    revalidatePath('/', 'layout')
     return { success: true, data }
   } catch (error: any) {
     console.error('[Action Error] upsertCourse:', error)
@@ -192,8 +190,7 @@ export async function deleteCourse(id: string) {
 
     if (error) throw new Error(`Xóa thất bại: ${error.message}`)
 
-    revalidatePath('/admin/courses')
-    revalidatePath('/courses')
+    revalidatePath('/', 'layout')
     return { success: true }
   } catch (error: any) {
     console.error('[Action Error] deleteCourse:', error)
@@ -416,9 +413,7 @@ export async function seedSampleData() {
       if (seedCourseErr) throw new Error(`Lỗi seed khoá học: ${seedCourseErr.message}`)
     }
 
-    revalidatePath('/')
-    revalidatePath('/courses')
-    revalidatePath('/admin')
+    revalidatePath('/', 'layout')
     
     return { success: true }
   } catch (error: any) {

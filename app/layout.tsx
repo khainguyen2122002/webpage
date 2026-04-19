@@ -6,6 +6,10 @@ import { Footer } from "@/components/footer";
 import { Toaster } from "@/components/ui/sonner"
 import { GoogleAnalytics } from '@next/third-parties/google'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

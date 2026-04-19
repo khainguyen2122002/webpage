@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Menu, X, GraduationCap } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/utils/supabase/client'
@@ -14,6 +15,7 @@ export function Navbar() {
   const [user, setUser] = useState<User | null>(null)
   const [centerName, setCenterName] = useState('INSPIRING HR')
   const supabase = createClient()
+  const router = useRouter()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,7 +41,10 @@ export function Navbar() {
 
     // Realtime for center name
     const channel = supabase.channel('nav-center').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'center_info' }, (payload) => {
-        if (payload.new.name) setCenterName(payload.new.name.toUpperCase())
+        if (payload.new.name) {
+          setCenterName(payload.new.name.toUpperCase())
+          router.refresh()
+        }
     }).subscribe()
 
     return () => {

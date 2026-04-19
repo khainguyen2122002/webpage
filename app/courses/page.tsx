@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Search, Filter, BookOpen, Clock, Users, ArrowRight, Layers, Sparkles } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -25,6 +26,7 @@ export default function CoursesPage() {
   const [levelFilter, setLevelFilter] = useState('all')
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
+  const router = useRouter()
 
   useEffect(() => {
     async function fetchCourses() {
@@ -46,6 +48,7 @@ export default function CoursesPage() {
       .channel('public-courses')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'courses' }, (payload) => {
         fetchCourses()
+        router.refresh()
       })
       .subscribe()
 

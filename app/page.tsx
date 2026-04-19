@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, BookOpen, Users, Award, CheckCircle2, Star, Sparkles, PhoneCall, Clock, Layers, Loader2, Globe } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
@@ -16,6 +17,7 @@ export default function Home() {
   const [featuredCourses, setFeaturedCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
+  const router = useRouter()
 
   useEffect(() => {
     async function fetchData() {
@@ -41,9 +43,11 @@ export default function Home() {
       .channel('home-data')
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'center_info' }, (payload) => {
         setCenterInfo(payload.new as CenterInfo)
+        router.refresh()
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'courses' }, (payload) => {
         fetchData() // Refresh everything if courses change
+        router.refresh()
       })
       .subscribe()
 
