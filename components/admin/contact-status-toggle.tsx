@@ -20,9 +20,10 @@ interface ContactStatusToggleProps {
 export function ContactStatusToggle({ contactId, currentStatus }: ContactStatusToggleProps) {
   const [isPending, startTransition] = useTransition()
 
-  function handleStatusChange(newStatus: string) {
+  function handleStatusChange(newStatus: 'new' | 'contacted' | 'resolved' | null) {
+    if (!newStatus) return
     startTransition(async () => {
-      const result = await updateContactStatus(contactId, newStatus as any)
+      const result = await updateContactStatus(contactId, newStatus)
       if (result.success) {
         toast.success('Đã cập nhật trạng thái')
       } else {
