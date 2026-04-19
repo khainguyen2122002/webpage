@@ -37,27 +37,29 @@ export default async function Page({ params }: PageProps) {
   const supabase = await createClient()
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
-  const { data: courseData } = await supabase
-    .from('courses')
-    .select('*')
-    .eq('slug', slug)
-    .single()
+  try {
+    const { data: courseData, error: courseError } = await supabase
+      .from('courses')
+      .select('*')
+      .eq('slug', slug)
+      .single()
 
-  const { data: centerData } = await supabase
-    .from('center_info')
-    .select('*')
-    .eq('id', '00000000-0000-0000-0000-000000000000')
-    .single()
+    if (courseError || !courseData) {
+      console.error('[Course Page] Error fetching course:', courseError)
+      notFound()
+    }
 
-  if (!courseData) {
-    notFound()
-  }
+    const { data: centerData } = await supabase
+      .from('center_info')
+      .select('*')
+      .eq('id', '00000000-0000-0000-0000-000000000000')
+      .single()
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Course',
-    name: courseData.title,
-    description: courseData.description,
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'Course',
+      name: courseData.title,
+      description: courseData.description,
     provider: {
       '@type': 'Organization',
       name: centerData?.name || 'EduCenter',
@@ -82,4 +84,8 @@ export default async function Page({ params }: PageProps) {
       />
     </>
   )
+ } catch (error) {
+    console.error('[Course Page] Error:', error)
+    notFound()
+ }
 }

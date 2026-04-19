@@ -93,6 +93,32 @@ export function CourseFormDialog({
     },
   })
 
+  // Sửa lỗi Edit: Cập nhật lại Form mỗi khi prop course thay đổi hoặc khi mở Dialog
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        title: course?.title || "",
+        slug: course?.slug || "",
+        description: course?.description || "",
+        price: Number(course?.price || 0),
+        original_price: course?.original_price ? Number(course?.original_price) : null,
+        discount_percent: course?.discount_percent ? Number(course?.discount_percent) : null,
+        duration: course?.duration || "",
+        schedule: course?.schedule || "",
+        level: course?.level || "Cơ bản",
+        category: course?.category || "",
+        instructor_name: course?.instructor_name || "",
+        instructor_role: course?.instructor_role || "",
+        learning_goals: course?.learning_goals || "",
+        target_audience: course?.target_audience || "",
+        external_form_url: course?.external_form_url || "",
+        is_featured: !!course?.is_featured,
+      })
+      setPreview(course?.image_url || null)
+      setImageFile(null)
+    }
+  }, [course, open, form])
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -139,7 +165,8 @@ export function CourseFormDialog({
           </Button>
         )) as any
       } />
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl p-0 border-none shadow-2xl">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto rounded-3xl p-0 border-none shadow-2xl">
+
         <DialogHeader className="p-8 bg-primary text-white sticky top-0 z-10">
           <DialogTitle className="text-2xl font-bold">{course ? 'Chỉnh sửa khóa học' : 'Thêm khóa học mới'}</DialogTitle>
           <DialogDescription className="text-white/60 text-xs font-medium uppercase tracking-widest mt-1">
