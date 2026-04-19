@@ -23,8 +23,9 @@ import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
 import { CenterInfo } from "@/types"
 import { updateCenterInfo } from "@/app/actions"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 const formSchema = z.object({
   name: z.string().min(2, "Tên trung tâm quá ngắn"),
@@ -56,6 +57,7 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
   const [bannerFile, setBannerFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logo_url || null)
   const [bannerPreview, setBannerPreview] = useState<string | null>(initialData?.banner_url || null)
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as any,
@@ -83,6 +85,36 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
       internationalText: initialData?.international_text || "Chương trình đào tạo chuẩn quốc tế với đội ngũ chuyên gia.",
     } as z.infer<typeof formSchema>,
   })
+
+  useEffect(() => {
+    if (initialData) {
+      form.reset({
+        name: initialData.name || "",
+        slogan: initialData.slogan || "",
+        description: initialData.description || "",
+        address: initialData.address || "",
+        phone: initialData.phone || "",
+        email: initialData.email || "",
+        zaloUrl: initialData.zalo_url || "",
+        facebookUrl: initialData.facebook_url || "",
+        mapUrl: initialData.map_url || "",
+        statsCourses: Number(initialData.stats_courses ?? 50),
+        statsStudents: Number(initialData.stats_students ?? 12000),
+        statsRating: Number(initialData.stats_rating ?? 4.9),
+        showStats: Boolean(initialData.show_stats ?? false),
+        heroBadgeText: initialData.hero_badge_text || "Chào mừng bạn đến với EduCenter",
+        ctaPrimaryText: initialData.cta_primary_text || "Khám phá khóa học",
+        ctaSecondaryText: initialData.cta_secondary_text || "Tư vấn ngay",
+        ctaSecondaryUrl: initialData.cta_secondary_url || "/contact",
+        communityTitle: initialData.community_title || "Cộng đồng",
+        communityText: initialData.community_text || "Gia nhập cộng đồng HR hơn 12,000 học viên đã thành công.",
+        internationalTitle: initialData.international_title || "Tiêu chuẩn quốc tế",
+        internationalText: initialData.international_text || "Chương trình đào tạo chuẩn quốc tế với đội ngũ chuyên gia.",
+      })
+      if (initialData.logo_url && !logoFile) setLogoPreview(initialData.logo_url)
+      if (initialData.banner_url && !bannerFile) setBannerPreview(initialData.banner_url)
+    }
+  }, [initialData, form, logoFile, bannerFile])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'banner') => {
     const file = e.target.files?.[0]
@@ -114,7 +146,9 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
       
       const result = await updateCenterInfo(formData)
       if (result?.error) throw new Error(result.error)
-      toast.success("Đã cập nhật thông tin trung tâm thành công!")
+      toast.success("Cập nhật thành công!")
+      toast.info("Đang tải dữ liệu mới...")
+      router.refresh()
     } catch (error: any) {
       toast.error("Lỗi khi cập nhật: " + error.message)
     } finally {

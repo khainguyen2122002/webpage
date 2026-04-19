@@ -130,7 +130,10 @@ export async function updateCenterInfo(formData: FormData) {
     }
 
     revalidatePath('/', 'layout')
+    revalidatePath('/about')
+    revalidatePath('/courses')
     revalidatePath('/')
+    revalidatePath('/admin')
     return { success: true }
   } catch (error: any) {
     console.error('[Action Error] updateCenterInfo:', error)
