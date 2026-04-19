@@ -9,6 +9,7 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/utils/supabase/client'
 import { User } from '@supabase/supabase-js'
+import { SmartImage } from '@/components/ui/smart-image'
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -20,14 +21,8 @@ export function Navbar() {
   const router = useRouter()
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
-    }
-    window.addEventListener('scroll', handleScroll)
-    
-    // Fetch data
     const fetchData = async () => {
-      // User
+      // User auth
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
 
@@ -40,9 +35,10 @@ export function Navbar() {
     }
     fetchData()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20)
+    }
+    window.addEventListener('scroll', handleScroll)
 
     // Realtime for center name
     const channel = supabase.channel('nav-center').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'center_info' }, (payload) => {
@@ -53,10 +49,14 @@ export function Navbar() {
 
     return () => {
       window.removeEventListener('scroll', handleScroll)
-      subscription.unsubscribe()
       supabase.removeChannel(channel)
     }
-  }, [])
+  }, [supabase, router])
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
 
   const adminEmail = 'khainguyen2122002@gmail.com'
   const isAdmin = user?.email === adminEmail
@@ -79,22 +79,13 @@ export function Navbar() {
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          {logoUrl ? (
-            <div className="w-9 h-9 relative rounded-lg overflow-hidden bg-primary flex-shrink-0 flex items-center justify-center">
-              <img
-                src={logoUrl}
-                alt={centerName}
-                className="w-full h-full object-contain p-0.5"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).parentElement!.innerHTML = '<div class="bg-primary p-2 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-secondary w-6 h-6"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>';
-                }}
-              />
-            </div>
-          ) : (
-            <div className="bg-primary p-2 rounded-lg">
-              <GraduationCap className="text-secondary w-6 h-6" />
-            </div>
-          )}
+          <SmartImage
+            src={logoUrl}
+            alt={centerName}
+            fallbackType="logo"
+            className="w-full h-full object-contain p-0.5"
+            containerClassName="w-9 h-9 relative rounded-lg overflow-hidden bg-primary flex-shrink-0 flex items-center justify-center"
+          />
           <span className={cn(
             "font-bold text-xl tracking-tight",
             isScrolled ? "text-foreground" : "text-primary"

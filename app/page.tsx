@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/utils/supabase/server'
 import { Course, CenterInfo } from '@/types'
+import { SmartImage } from '@/components/ui/smart-image'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,7 +26,7 @@ export default async function Home() {
     .eq('is_featured', true)
     .limit(3)
 
-  const centerInfo = centerData as CenterInfo
+  const centerInfo = centerData as CenterInfo | null
   const featuredCourses = (coursesData as Course[]) || []
 
   return (
@@ -33,22 +34,13 @@ export default async function Home() {
       {/* Hero Section - Redesigned to User Specs */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
         {/* Background Image/Fallback */}
-        <div className="absolute inset-0 z-0 bg-[#0A3D2B]">
-          <img 
-            src={centerInfo?.banner_url || "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop"} 
-            alt="Background" 
+        <div className="absolute inset-0 z-0">
+          <SmartImage
+            src={centerInfo?.banner_url}
+            alt="Hero Banner"
+            fallbackType="banner"
             className="w-full h-full object-cover"
-            onError={(e) => {
-              const img = e.currentTarget as HTMLImageElement;
-              // If the custom URL fails, try the high-quality default
-              if (img.src !== "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop") {
-                img.src = "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop";
-              } else {
-                // If even the default fails, use gradient
-                img.parentElement!.style.background = 'linear-gradient(135deg, #0A3D2B 0%, #1a5c45 100%)';
-                img.style.display = 'none';
-              }
-            }}
+            containerClassName="w-full h-full"
           />
           {/* Dark Green Overlay #0A3D2B @ 65% */}
           <div className="absolute inset-0 bg-[#0A3D2B]/65 backdrop-blur-[2px]" />
