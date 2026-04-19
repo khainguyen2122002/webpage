@@ -14,6 +14,8 @@ import {
   Layers,
   PhoneCall,
   ChevronRight,
+  ChevronLeft,
+  ArrowLeft,
   Send,
   Loader2,
   Sparkles
@@ -100,10 +102,16 @@ export function CourseDetailView({
   return (
     <div className="min-h-screen bg-slate-50/50">
       {/* Page Header / Banner */}
-      <section className="bg-primary pt-40 pb-56 text-white relative overflow-hidden">
+      <section className="bg-primary pt-32 pb-56 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-secondary/10 -skew-x-12 transform translate-x-32" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl space-y-8">
+            <Link 
+              href="/courses" 
+              className="flex items-center gap-2 text-white/60 hover:text-white transition-colors font-black uppercase text-[10px] tracking-[0.2em] mb-10 group"
+            >
+              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" /> Quay lại danh sách
+            </Link>
             <div className="flex flex-wrap gap-3">
               <Badge className="bg-secondary text-white border-none py-1.5 px-4 rounded-xl font-black uppercase text-[10px] tracking-widest">
                 {course.category}

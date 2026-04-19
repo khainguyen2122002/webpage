@@ -168,14 +168,17 @@ export default async function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             {featuredCourses.map((course) => (
-              <Card key={course.id} className="border-none shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] rounded-[3rem] overflow-hidden group hover:shadow-[0_50px_100px_-20px_rgba(26,67,1,0.15)] transition-all duration-700 bg-white hover:-translate-y-5 border-t border-slate-50">
+              <Card key={course.id} className="border-none shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] rounded-[3rem] overflow-hidden group hover:shadow-[0_50px_100px_-20px_rgba(26,67,1,0.15)] transition-all duration-700 bg-white hover:-translate-y-5 border-t border-slate-50 relative">
+                {/* Overlay Link phủ toàn bộ thẻ */}
+                <Link href={`/courses/${course.slug}`} className="absolute inset-0 z-20" aria-label={`Xem chi tiết ${course.title}`} />
+                
                 <div className="relative h-72 overflow-hidden">
                   {course.image_url ? (
                     <Image src={course.image_url} alt={course.title} fill className="object-cover group-hover:scale-110 transition-transform duration-1000" />
                   ) : (
                     <div className="bg-slate-100 w-full h-full" />
                   )}
-                  <div className="absolute top-8 left-8 flex flex-col gap-3">
+                  <div className="absolute top-8 left-8 flex flex-col gap-3 z-30">
                     <Badge className="bg-white/95 text-primary border-none font-black px-5 py-2 rounded-2xl backdrop-blur-md shadow-sm uppercase text-[10px] tracking-widest w-fit">
                       {course.category}
                     </Badge>
@@ -186,7 +189,7 @@ export default async function Home() {
                     )}
                   </div>
                 </div>
-                <CardContent className="p-10 space-y-8">
+                <CardContent className="p-10 space-y-8 relative z-30">
                   <div className="flex justify-between items-center text-[11px] font-black text-slate-400 uppercase tracking-[2px]">
                     <div className="flex items-center gap-2">
                        <Clock className="w-4 h-4 text-secondary translate-y-[-1px]" /> {course.duration}
@@ -205,11 +208,9 @@ export default async function Home() {
                          {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(course.price)}
                       </span>
                     </div>
-                    <Link href={`/courses/${course.slug}`}>
-                       <Button size="icon" className="w-16 h-16 rounded-2xl bg-slate-50 text-secondary hover:bg-secondary hover:text-white transition-all shadow-sm">
-                          <ArrowRight className="w-7 h-7" />
-                       </Button>
-                    </Link>
+                    <Button size="icon" className="w-16 h-16 rounded-2xl bg-slate-50 text-secondary group-hover:bg-secondary group-hover:text-white transition-all shadow-sm">
+                       <ArrowRight className="w-7 h-7" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

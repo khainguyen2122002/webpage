@@ -140,20 +140,23 @@ export default function CoursesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {filteredCourses.map((course) => (
-              <Card key={course.id} className="border-none shadow-[0_20px_50px_rgba(0,0,0,0.05)] rounded-[2.5rem] overflow-hidden group hover:shadow-[0_40px_80px_rgba(26,67,1,0.12)] transition-all duration-500 bg-white hover:-translate-y-3">
-                <div className="relative h-64">
+              <Card key={course.id} className="border-none shadow-[0_20px_50px_rgba(0,0,0,0.05)] rounded-[2.5rem] overflow-hidden group hover:shadow-[0_40px_80px_rgba(26,67,1,0.12)] transition-all duration-500 bg-white hover:-translate-y-3 relative">
+                {/* Overlay Link phủ toàn bộ thẻ */}
+                <Link href={`/courses/${course.slug}`} className="absolute inset-0 z-20" aria-label={`Xem chi tiết ${course.title}`} />
+                
+                <div className="relative h-64 overflow-hidden">
                   {course.image_url ? (
                     <Image src={course.image_url} alt={course.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
                   ) : (
                     <div className="bg-slate-100 w-full h-full" />
                   )}
-                  <div className="absolute top-6 left-6">
+                  <div className="absolute top-6 left-6 z-30">
                     <Badge className="bg-white/95 text-primary border-none font-black px-4 py-1.5 rounded-xl backdrop-blur-md shadow-sm uppercase text-[10px] tracking-widest">
                       {course.category}
                     </Badge>
                   </div>
                 </div>
-                <CardContent className="p-8 space-y-6">
+                <CardContent className="p-8 space-y-6 relative z-30">
                   <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-[2px]">
                     <div className="flex items-center gap-2">
                        <Clock className="w-4 h-4 text-secondary translate-y-[-1px]" /> {course.duration}
@@ -175,11 +178,9 @@ export default function CoursesPage() {
                         {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(course.price)}
                       </span>
                     </div>
-                    <Link href={`/courses/${course.slug}`}>
-                       <Button size="icon" className="w-14 h-14 rounded-2xl bg-primary text-white hover:bg-secondary transition-all shadow-xl shadow-primary/20">
-                          <ArrowRight className="w-6 h-6" />
-                       </Button>
-                    </Link>
+                    <Button size="icon" className="w-14 h-14 rounded-2xl bg-primary text-white group-hover:bg-secondary transition-all shadow-xl shadow-primary/20">
+                       <ArrowRight className="w-6 h-6" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
