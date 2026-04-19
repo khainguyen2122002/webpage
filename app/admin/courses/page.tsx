@@ -34,6 +34,8 @@ export default function AdminCoursesPage() {
   const [courses, setCourses] = useState<Course[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
   const supabase = createClient()
 
   const fetchCourses = async () => {
@@ -187,14 +189,15 @@ export default function AdminCoursesPage() {
                       <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 border-slate-100 shadow-xl">
                         <DropdownMenuLabel className="text-slate-400 font-bold uppercase text-[10px] tracking-widest px-3 py-2">Hành động</DropdownMenuLabel>
                         
-                        <CourseFormDialog 
-                          course={course}
-                          trigger={
-                            <div className="flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-slate-50 rounded-xl transition-colors cursor-pointer w-full font-medium">
-                              <Edit className="w-4 h-4 text-secondary" /> Chỉnh sửa
-                            </div>
-                          }
-                        />
+                        <DropdownMenuItem 
+                          onSelect={() => {
+                            setSelectedCourse(course)
+                            setIsEditDialogOpen(true)
+                          }}
+                          className="rounded-xl gap-2 px-3 py-2.5 text-sm hover:bg-slate-50 transition-colors cursor-pointer font-medium"
+                        >
+                          <Edit className="w-4 h-4 text-secondary" /> Chỉnh sửa
+                        </DropdownMenuItem>
 
                         <Link 
                           href={`/courses/${course.slug}`} 
@@ -229,6 +232,13 @@ export default function AdminCoursesPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Hidden Dialog for Editing */}
+      <CourseFormDialog 
+        course={selectedCourse as any} 
+        open={isEditDialogOpen} 
+        onOpenChange={setIsEditDialogOpen}
+      />
     </div>
   )
 }

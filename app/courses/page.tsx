@@ -142,7 +142,7 @@ export default function CoursesPage() {
             {filteredCourses.map((course) => (
               <Card key={course.id} className="border-none shadow-[0_20px_50px_rgba(0,0,0,0.05)] rounded-[2.5rem] overflow-hidden group hover:shadow-[0_40px_80px_rgba(26,67,1,0.12)] transition-all duration-500 bg-white hover:-translate-y-3 relative">
                 {/* Overlay Link phủ toàn bộ thẻ */}
-                <Link href={`/courses/${course.slug}`} className="absolute inset-0 z-20" aria-label={`Xem chi tiết ${course.title}`} />
+                <Link href={`/courses/${course.slug || course.id}`} className="absolute inset-0 z-20" aria-label={`Xem chi tiết ${course.title}`} />
                 
                 <div className="relative h-64 overflow-hidden">
                   {course.image_url ? (

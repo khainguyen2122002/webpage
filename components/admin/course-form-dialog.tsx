@@ -61,12 +61,18 @@ type FormValues = z.infer<typeof formSchema>
 
 export function CourseFormDialog({ 
   course, 
-  trigger 
+  trigger,
+  open: externalOpen,
+  onOpenChange: externalOnOpenChange
 }: { 
   course?: Course, 
-  trigger?: React.ReactElement 
+  trigger?: React.ReactElement,
+  open?: boolean,
+  onOpenChange?: (open: boolean) => void
 }) {
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = externalOpen !== undefined ? externalOpen : internalOpen
+  const setOpen = externalOnOpenChange || setInternalOpen
   const [loading, setLoading] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(course?.image_url || null)
