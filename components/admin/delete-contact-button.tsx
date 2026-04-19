@@ -6,16 +6,15 @@ import { Button } from '@/components/ui/button'
 import { Trash2, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 interface DeleteContactButtonProps {
   contactId: string
@@ -36,8 +35,8 @@ export function DeleteContactButton({ contactId }: DeleteContactButtonProps) {
   }
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
+    <Dialog>
+      <DialogTrigger asChild>
         <Button 
           variant="ghost" 
           disabled={isPending}
@@ -46,24 +45,29 @@ export function DeleteContactButton({ contactId }: DeleteContactButtonProps) {
           {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
           Xóa bản ghi này
         </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent className="rounded-[2rem]">
-        <AlertDialogHeader>
-          <AlertDialogTitle>Xác nhận xóa?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Hành động này không thể hoàn tác. Dữ liệu của học viên này sẽ bị xóa vĩnh viễn khỏi hệ thống.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel className="rounded-xl">Hủy</AlertDialogCancel>
-          <AlertDialogAction 
+      </DialogTrigger>
+      <DialogContent className="rounded-[2rem] sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold">Xác nhận xóa?</DialogTitle>
+          <DialogDescription className="text-slate-500 mt-2">
+            Hành động này không thể hoàn tác. Dữ liệu của học viên này sẽ bị xóa vĩnh viễn khỏi hệ thống của bạn.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="mt-6 flex gap-2">
+          <DialogClose asChild>
+            <Button variant="outline" className="rounded-xl flex-grow">Hủy bỏ</Button>
+          </DialogClose>
+          <Button 
             onClick={handleDelete}
-            className="rounded-xl bg-red-500 hover:bg-red-600"
+            disabled={isPending}
+            className="rounded-xl bg-red-500 hover:bg-red-600 flex-grow"
           >
+            {isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
             Vẫn xóa
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
+
