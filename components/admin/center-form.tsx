@@ -58,6 +58,9 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
   const [bannerFile, setBannerFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logo_url || null)
   const [bannerPreview, setBannerPreview] = useState<string | null>(initialData?.banner_url || null)
+  // Track saved URLs separately so previews persist across router.refresh()
+  const [savedLogoUrl, setSavedLogoUrl] = useState<string | null>(initialData?.logo_url || null)
+  const [savedBannerUrl, setSavedBannerUrl] = useState<string | null>(initialData?.banner_url || null)
   const router = useRouter()
 
   const formValues = React.useMemo(() => {
@@ -116,8 +119,15 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
   })
 
   useEffect(() => {
-    if (initialData?.logo_url && !logoFile) setLogoPreview(initialData.logo_url)
-    if (initialData?.banner_url && !bannerFile) setBannerPreview(initialData.banner_url)
+    // Always sync preview with latest server data when initialData changes
+    if (initialData?.logo_url) {
+      setSavedLogoUrl(initialData.logo_url)
+      if (!logoFile) setLogoPreview(initialData.logo_url)
+    }
+    if (initialData?.banner_url) {
+      setSavedBannerUrl(initialData.banner_url)
+      if (!bannerFile) setBannerPreview(initialData.banner_url)
+    }
   }, [initialData, logoFile, bannerFile])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'banner') => {
@@ -145,13 +155,18 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
       
       if (logoFile) formData.append('logoFile', logoFile)
       if (bannerFile) formData.append('bannerFile', bannerFile)
-      if (initialData?.logo_url) formData.append('logoUrl', initialData.logo_url)
-      if (initialData?.banner_url) formData.append('bannerUrl', initialData.banner_url)
+      // Pass current saved URLs as fallback if no new file uploaded
+      formData.append('logoUrl', savedLogoUrl || '')
+      formData.append('bannerUrl', savedBannerUrl || '')
       
       const result = await updateCenterInfo(formData)
       if (result?.error) throw new Error(result.error)
+
+      // Clear file inputs after successful save
+      setLogoFile(null)
+      setBannerFile(null)
+
       toast.success("Cập nhật thành công!")
-      toast.info("Đang tải dữ liệu mới...")
       router.refresh()
     } catch (error: any) {
       toast.error("Lỗi khi cập nhật: " + error.message)
