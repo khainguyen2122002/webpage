@@ -1,34 +1,23 @@
-'use client'
-
-import { useState } from 'react'
-import { Mail, Phone, MapPin, Send, Loader2, MessageSquare, User, AtSign, PhoneOutgoing } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent } from '@/components/ui/card'
+import { Mail, Phone, MapPin, BadgeCheck, PhoneOutgoing, AtSign } from 'lucide-react'
+import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { toast } from 'sonner'
-import { submitContact } from '@/app/actions'
+import { createClient } from '@/utils/supabase/server'
+import { ContactForm } from '@/components/contact-form'
+import { CenterInfo } from '@/types'
 
-export default function ContactPage() {
-  const [loading, setLoading] = useState(false)
+export const dynamic = 'force-dynamic'
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setLoading(true)
-    
-    try {
-      const formData = new FormData(e.currentTarget)
-      const result = await submitContact(formData)
-      if (result?.error) throw new Error(result.error)
-      toast.success("Cảm ơn bạn! Chúng tôi sẽ liên hệ lại sớm nhất.")
-      e.currentTarget.reset()
-    } catch (error: any) {
-      toast.error("Lỗi: " + error.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+export default async function ContactPage() {
+  const supabase = await createClient()
+
+  // Fetch real center info
+  const { data: centerData } = await supabase
+    .from('center_info')
+    .select('*')
+    .eq('id', '00000000-0000-0000-0000-000000000000')
+    .single()
+
+  const centerInfo = centerData as CenterInfo | null
 
   return (
     <div className="min-h-screen bg-slate-50 pt-32 pb-20">
@@ -62,7 +51,7 @@ export default function ContactPage() {
                      </div>
                      <div>
                        <h4 className="font-bold text-xl mb-1 text-secondary">Văn phòng chính</h4>
-                       <p className="text-white/70 text-lg leading-relaxed">Số 123, Đường Cách Mạng Tháng 8, Quận 10, TP. Hồ Chí Minh</p>
+                       <p className="text-white/70 text-lg leading-relaxed">{centerInfo?.address || 'Đang cập nhật địa chỉ...'}</p>
                      </div>
                    </div>
 
@@ -72,7 +61,7 @@ export default function ContactPage() {
                      </div>
                      <div>
                        <h4 className="font-bold text-xl mb-1 text-secondary">Điện thoại</h4>
-                       <p className="text-white/70 text-lg leading-relaxed">0123 456 789</p>
+                       <p className="text-white/70 text-lg leading-relaxed">{centerInfo?.phone || 'Đang cập nhật số điện thoại...'}</p>
                      </div>
                    </div>
 
@@ -82,7 +71,7 @@ export default function ContactPage() {
                      </div>
                      <div>
                        <h4 className="font-bold text-xl mb-1 text-secondary">Email</h4>
-                       <p className="text-white/70 text-lg leading-relaxed">contact@educenter.vn</p>
+                       <p className="text-white/70 text-lg leading-relaxed">{centerInfo?.email || 'Đang cập nhật email...'}</p>
                      </div>
                    </div>
                  </div>
@@ -97,73 +86,11 @@ export default function ContactPage() {
 
           {/* Form Side */}
           <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-12 overflow-hidden relative">
-            <CardContent className="p-0 space-y-8">
-              <div className="space-y-2">
-                <h3 className="text-3xl font-black text-primary">Gửi tin nhắn</h3>
-                <p className="text-slate-400 font-medium italic">Chúng tôi sẽ phản hồi trong vòng 24 giờ làm việc.</p>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-4">
-                  <div className="relative group">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-primary transition-colors" />
-                    <Input 
-                      name="name"
-                      placeholder="Họ và tên của bạn" 
-                      required
-                      className="pl-12 h-14 bg-slate-50 border-none rounded-2xl focus-visible:ring-primary text-md"
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="relative group">
-                      <AtSign className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-primary transition-colors" />
-                      <Input 
-                        name="email"
-                        type="email"
-                        placeholder="Địa chỉ Email" 
-                        required
-                        className="pl-12 h-14 bg-slate-50 border-none rounded-2xl focus-visible:ring-primary text-md"
-                      />
-                    </div>
-                    <div className="relative group">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-primary transition-colors" />
-                      <Input 
-                        name="phone"
-                        placeholder="Số điện thoại" 
-                        required
-                        className="pl-12 h-14 bg-slate-50 border-none rounded-2xl focus-visible:ring-primary text-md"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="relative group">
-                    <MessageSquare className="absolute left-4 top-6 w-5 h-5 text-slate-300 group-focus-within:text-primary transition-colors" />
-                    <Textarea 
-                      name="message"
-                      placeholder="Lời nhắn của bạn..." 
-                      className="pl-12 pt-5 min-h-[160px] bg-slate-50 border-none rounded-3xl focus-visible:ring-primary text-md"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <Button 
-                  type="submit" 
-                  disabled={loading}
-                  className="w-full h-16 bg-primary hover:bg-primary/90 text-white font-black text-xl rounded-2xl shadow-2xl shadow-primary/20 transition-all active:scale-95"
-                >
-                  {loading ? (
-                    <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-                  ) : (
-                    <>Gửi tin nhắn <Send className="ml-2 w-5 h-5" /></>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
+            <ContactForm />
           </Card>
         </div>
       </div>
     </div>
   )
 }
+

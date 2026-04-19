@@ -48,3 +48,15 @@ export type Course = {
   created_at: string
   updated_at: string
 }
+
+export type Contact = {
+  id: string
+  name: string
+  email: string | null
+  phone: string
+  message: string | null
+  course_id: string | null
+  type: 'contact' | 'consultation'
+  status: 'new' | 'contacted' | 'resolved'
+  created_at: string
+}

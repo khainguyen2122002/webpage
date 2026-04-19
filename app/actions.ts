@@ -206,10 +206,64 @@ export async function submitContact(formData: FormData) {
        throw new Error(`Đã có lỗi CSDL: ${error.message}`)
     }
 
+    // Gửi email thông báo (Nếu có cấu hình - Tạm thời log ra console)
+    console.log(`[Notification] Có yêu cầu mới từ ${contactData.name} (${contactData.phone})`)
+    // Sau này có thể dùng Resend: await resend.emails.send({...})
+
     return { success: true }
   } catch (error: any) {
     console.error('[Action Error] submitContact:', error)
     return { error: error.message || 'Không thể gửi thông tin liên hệ.' }
+  }
+}
+
+export async function getContacts() {
+  try {
+    const { supabase } = await getAdminUser()
+    const { data, error } = await supabase
+      .from('contacts')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return { success: true, data: data as Contact[] }
+  } catch (error: any) {
+    console.error('[Action Error] getContacts:', error)
+    return { error: error.message || 'Lỗi khi lấy danh sách liên hệ.' }
+  }
+}
+
+export async function updateContactStatus(id: string, status: 'new' | 'contacted' | 'resolved') {
+  try {
+    const { supabase } = await getAdminUser()
+    const { error } = await supabase
+      .from('contacts')
+      .update({ status })
+      .eq('id', id)
+
+    if (error) throw error
+    revalidatePath('/admin/contacts')
+    return { success: true }
+  } catch (error: any) {
+    console.error('[Action Error] updateContactStatus:', error)
+    return { error: error.message || 'Lỗi khi cập nhật trạng thái.' }
+  }
+}
+
+export async function deleteContact(id: string) {
+  try {
+    const { supabase } = await getAdminUser()
+    const { error } = await supabase
+      .from('contacts')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw error
+    revalidatePath('/admin/contacts')
+    return { success: true }
+  } catch (error: any) {
+    console.error('[Action Error] deleteContact:', error)
+    return { error: error.message || 'Lỗi khi xóa liên hệ.' }
   }
 }
 

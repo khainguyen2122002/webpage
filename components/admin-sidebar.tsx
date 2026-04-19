@@ -8,7 +8,8 @@ import {
   BookOpen, 
   Settings, 
   LogOut,
-  ChevronLeft
+  ChevronLeft,
+  MessageSquare
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -22,6 +23,7 @@ export function AdminSidebar() {
 
   const links = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/admin/contacts', label: 'Yêu cầu tư vấn', icon: MessageSquare },
     { href: '/admin/center', label: 'Thông tin trung tâm', icon: School },
     { href: '/admin/courses', label: 'Quản lý khóa học', icon: BookOpen },
     { href: '/admin/settings', label: 'Cài đặt', icon: Settings },
