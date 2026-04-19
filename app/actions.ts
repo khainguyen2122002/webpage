@@ -116,16 +116,21 @@ export async function updateCenterInfo(formData: FormData) {
 
     const { error } = await supabase
       .from('center_info')
-      .upsert({ id: '00000000-0000-0000-0000-000000000000', ...updates })
+      .upsert(
+        { id: '00000000-0000-0000-0000-000000000000', ...updates },
+        { onConflict: 'id' }
+      )
 
     if (error) {
+      console.log('Error updating center_info:', error)
       if (error.code === '42P01') throw new Error('Không tìm thấy bảng center_info. Hãy chạy SQL schema.')
       if (error.code === '42703') throw new Error('Cột dữ liệu bị thiếu trong bảng center_info.')
-      if (error.code === '42501') throw new Error('Thiệt lập RLS trong db chặn bạn cập nhật (Chưa có Policy Update).')
+      if (error.code === '42501') throw new Error('Thiết lập RLS trong db chặn bạn cập nhật (Chưa có Policy Update).')
       throw new Error(`Cập nhật db thất bại: ${error.message}`)
     }
 
     revalidatePath('/', 'layout')
+    revalidatePath('/')
     return { success: true }
   } catch (error: any) {
     console.error('[Action Error] updateCenterInfo:', error)
