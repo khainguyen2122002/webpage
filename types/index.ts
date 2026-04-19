@@ -26,24 +26,31 @@ export type CenterInfo = {
   updated_at: string
 }
 
-export type Course = {
+export interface Course {
   id: string
   slug: string
   title: string
   description: string
   content: {
     overview: string
-    curriculum: {
+    curriculum: Array<{
       title: string
       lessons: string[]
-    }[]
+    }>
   }
   price: number
+  original_price?: number
+  discount_percent?: number
+  instructor_name?: string
+  instructor_role?: string
+  learning_goals?: string
+  target_audience?: string
+  external_form_url?: string
   duration: string
-  schedule: string | null
-  level: string | null
-  image_url: string | null
+  schedule: string
+  level: string
   category: string
+  image_url?: string
   is_featured: boolean
   created_at: string
   updated_at: string

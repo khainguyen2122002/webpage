@@ -43,6 +43,13 @@ CREATE TABLE IF NOT EXISTS courses (
   category TEXT,
   image_url TEXT,
   is_featured BOOLEAN DEFAULT false,
+  original_price DECIMAL,
+  discount_percent INTEGER,
+  instructor_name TEXT,
+  instructor_role TEXT,
+  learning_goals TEXT,
+  target_audience TEXT,
+  external_form_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );

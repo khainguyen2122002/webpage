@@ -175,10 +175,15 @@ export default async function Home() {
                   ) : (
                     <div className="bg-slate-100 w-full h-full" />
                   )}
-                  <div className="absolute top-8 left-8">
-                    <Badge className="bg-white/95 text-primary border-none font-black px-5 py-2 rounded-2xl backdrop-blur-md shadow-sm uppercase text-[10px] tracking-widest">
+                  <div className="absolute top-8 left-8 flex flex-col gap-3">
+                    <Badge className="bg-white/95 text-primary border-none font-black px-5 py-2 rounded-2xl backdrop-blur-md shadow-sm uppercase text-[10px] tracking-widest w-fit">
                       {course.category}
                     </Badge>
+                    {course.discount_percent && (
+                      <Badge className="bg-red-500 text-white border-none font-black px-4 py-2 rounded-xl shadow-lg uppercase text-[12px] tracking-widest w-fit animate-pulse">
+                        -{course.discount_percent}%
+                      </Badge>
+                    )}
                   </div>
                 </div>
                 <CardContent className="p-10 space-y-8">
