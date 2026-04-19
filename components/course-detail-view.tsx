@@ -82,7 +82,8 @@ export function CourseDetailView({
       formData.append('type', 'consultation')
       formData.append('message', `Yêu cầu tư vấn khóa học: ${course.title}`)
       
-      await submitContact(formData)
+      const result = await submitContact(formData)
+      if (result?.error) throw new Error(result.error)
       toast.success("Yêu cầu tư vấn đã được gửi! Chúng tôi sẽ gọi cho bạn sớm.")
       e.currentTarget.reset()
     } catch (error: any) {

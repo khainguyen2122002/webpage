@@ -21,7 +21,8 @@ export function SeedDataButton() {
     
     setLoading(true)
     try {
-      await seedSampleData()
+      const result = await seedSampleData()
+      if (result?.error) throw new Error(result.error)
       toast.success('Đã nạp dữ liệu mẫu thành công! Hãy làm mới trang để thấy thay đổi.')
       window.location.reload()
     } catch (error: any) {

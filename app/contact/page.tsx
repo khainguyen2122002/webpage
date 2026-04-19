@@ -19,7 +19,8 @@ export default function ContactPage() {
     
     try {
       const formData = new FormData(e.currentTarget)
-      await submitContact(formData)
+      const result = await submitContact(formData)
+      if (result?.error) throw new Error(result.error)
       toast.success("Cảm ơn bạn! Chúng tôi sẽ liên hệ lại sớm nhất.")
       e.currentTarget.reset()
     } catch (error: any) {

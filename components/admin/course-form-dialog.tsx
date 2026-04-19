@@ -103,7 +103,8 @@ export function CourseFormDialog({
       // Preserve content
       formData.append('content', JSON.stringify(course?.content || { overview: "", curriculum: [] }))
 
-      await upsertCourse(formData)
+      const result = await upsertCourse(formData)
+      if (result?.error) throw new Error(result.error)
       toast.success(course ? "Cập nhật thành công!" : "Tạo khóa học thành công!")
       setOpen(false)
     } catch (error: any) {

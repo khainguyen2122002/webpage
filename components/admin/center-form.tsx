@@ -112,7 +112,8 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
       if (initialData?.logo_url) formData.append('logoUrl', initialData.logo_url)
       if (initialData?.banner_url) formData.append('bannerUrl', initialData.banner_url)
       
-      await updateCenterInfo(formData)
+      const result = await updateCenterInfo(formData)
+      if (result?.error) throw new Error(result.error)
       toast.success("Đã cập nhật thông tin trung tâm thành công!")
     } catch (error: any) {
       toast.error("Lỗi khi cập nhật: " + error.message)

@@ -83,7 +83,8 @@ export default function AdminCoursesPage() {
   const handleDelete = async (id: string) => {
     if (confirm("Bạn có chắc chắn muốn xóa khóa học này?")) {
       try {
-        await deleteCourse(id)
+        const result = await deleteCourse(id)
+        if (result?.error) throw new Error(result.error)
         toast.success("Đã xóa khóa học")
       } catch (error: any) {
         toast.error("Lỗi: " + error.message)
