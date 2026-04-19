@@ -36,16 +36,18 @@ export function DeleteContactButton({ contactId }: DeleteContactButtonProps) {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button 
-          variant="ghost" 
-          disabled={isPending}
-          className="w-full justify-start gap-3 rounded-xl text-red-500 hover:text-red-600 hover:bg-red-50"
-        >
-          {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-          Xóa bản ghi này
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger
+        render={
+          <Button 
+            variant="ghost" 
+            disabled={isPending}
+            className="w-full justify-start gap-3 rounded-xl text-red-500 hover:text-red-600 hover:bg-red-50"
+          >
+            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+            Xóa bản ghi này
+          </Button>
+        }
+      />
       <DialogContent className="rounded-[2rem] sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Xác nhận xóa?</DialogTitle>
@@ -54,9 +56,7 @@ export function DeleteContactButton({ contactId }: DeleteContactButtonProps) {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="mt-6 flex gap-2">
-          <DialogClose asChild>
-            <Button variant="outline" className="rounded-xl flex-grow">Hủy bỏ</Button>
-          </DialogClose>
+          <DialogClose render={<Button variant="outline" className="rounded-xl flex-grow">Hủy bỏ</Button>} />
           <Button 
             onClick={handleDelete}
             disabled={isPending}
@@ -70,4 +70,5 @@ export function DeleteContactButton({ contactId }: DeleteContactButtonProps) {
     </Dialog>
   )
 }
+
 
