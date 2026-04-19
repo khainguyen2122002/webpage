@@ -23,7 +23,7 @@ import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
 import { CenterInfo } from "@/types"
 import { updateCenterInfo } from "@/app/actions"
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { createClient } from '@/utils/supabase/client'
@@ -60,102 +60,65 @@ export function CenterForm({ initialData }: { initialData: CenterInfo | null }) 
   const [bannerPreview, setBannerPreview] = useState<string | null>(initialData?.banner_url || null)
   const router = useRouter()
 
+  const formValues = React.useMemo(() => {
+    if (!initialData) return undefined;
+    return {
+      name: initialData.name || "",
+      slogan: initialData.slogan || "",
+      description: initialData.description || "",
+      address: initialData.address || "",
+      phone: initialData.phone || "",
+      email: initialData.email || "",
+      zaloUrl: initialData.zalo_url || "",
+      facebookUrl: initialData.facebook_url || "",
+      mapUrl: initialData.map_url || "",
+      statsCourses: Number(initialData.stats_courses ?? 50),
+      statsStudents: Number(initialData.stats_students ?? 12000),
+      statsRating: Number(initialData.stats_rating ?? 4.9),
+      showStats: Boolean(initialData.show_stats ?? false),
+      heroBadgeText: initialData.hero_badge_text || "Chào mừng bạn đến với EduCenter",
+      ctaPrimaryText: initialData.cta_primary_text || "Khám phá khóa học",
+      ctaSecondaryText: initialData.cta_secondary_text || "Tư vấn ngay",
+      ctaSecondaryUrl: initialData.cta_secondary_url || "/contact",
+      communityTitle: initialData.community_title || "Cộng đồng",
+      communityText: initialData.community_text || "Gia nhập cộng đồng HR",
+      internationalTitle: initialData.international_title || "Tiêu chuẩn quốc tế",
+      internationalText: initialData.international_text || "Chương trình đào tạo chuẩn quốc tế",
+    }
+  }, [initialData])
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as any,
+    values: formValues,
     defaultValues: {
-      name: (initialData?.name as string) || "",
-      slogan: (initialData?.slogan as string) || "",
-      description: (initialData?.description as string) || "",
-      address: (initialData?.address as string) || "",
-      phone: (initialData?.phone as string) || "",
-      email: (initialData?.email as string) || "",
-      zaloUrl: (initialData?.zalo_url as string) || "",
-      facebookUrl: (initialData?.facebook_url as string) || "",
-      mapUrl: (initialData?.map_url as string) || "",
-      statsCourses: Number(initialData?.stats_courses ?? 50),
-      statsStudents: Number(initialData?.stats_students ?? 12000),
-      statsRating: Number(initialData?.stats_rating ?? 4.9),
-      showStats: Boolean(initialData?.show_stats ?? false),
-      heroBadgeText: initialData?.hero_badge_text || "Chào mừng bạn đến với EduCenter",
-      ctaPrimaryText: initialData?.cta_primary_text || "Khám phá khóa học",
-      ctaSecondaryText: initialData?.cta_secondary_text || "Tư vấn ngay",
-      ctaSecondaryUrl: initialData?.cta_secondary_url || "/contact",
-      communityTitle: initialData?.community_title || "Cộng đồng",
-      communityText: initialData?.community_text || "Gia nhập cộng đồng HR hơn 12,000 học viên đã thành công.",
-      internationalTitle: initialData?.international_title || "Tiêu chuẩn quốc tế",
-      internationalText: initialData?.international_text || "Chương trình đào tạo chuẩn quốc tế với đội ngũ chuyên gia.",
-    } as z.infer<typeof formSchema>,
+      name: "",
+      slogan: "",
+      description: "",
+      address: "",
+      phone: "",
+      email: "",
+      zaloUrl: "",
+      facebookUrl: "",
+      mapUrl: "",
+      statsCourses: 50,
+      statsStudents: 12000,
+      statsRating: 4.9,
+      showStats: false,
+      heroBadgeText: "Chào mừng bạn đến với EduCenter",
+      ctaPrimaryText: "Khám phá khóa học",
+      ctaSecondaryText: "Tư vấn ngay",
+      ctaSecondaryUrl: "/contact",
+      communityTitle: "Cộng đồng",
+      communityText: "Gia nhập cộng đồng HR",
+      internationalTitle: "Tiêu chuẩn quốc tế",
+      internationalText: "Chương trình đào tạo chuẩn quốc tế",
+    }
   })
 
   useEffect(() => {
-    async function loadFreshData() {
-      if (!initialData) return
-      
-      // Khởi tạo trước bằng state được nhồi sẵn
-      form.reset({
-        name: initialData.name || "",
-        slogan: initialData.slogan || "",
-        description: initialData.description || "",
-        address: initialData.address || "",
-        phone: initialData.phone || "",
-        email: initialData.email || "",
-        zaloUrl: initialData.zalo_url || "",
-        facebookUrl: initialData.facebook_url || "",
-        mapUrl: initialData.map_url || "",
-        statsCourses: Number(initialData.stats_courses ?? 50),
-        statsStudents: Number(initialData.stats_students ?? 12000),
-        statsRating: Number(initialData.stats_rating ?? 4.9),
-        showStats: Boolean(initialData.show_stats ?? false),
-        heroBadgeText: initialData.hero_badge_text || "Chào mừng bạn đến với EduCenter",
-        ctaPrimaryText: initialData.cta_primary_text || "Khám phá khóa học",
-        ctaSecondaryText: initialData.cta_secondary_text || "Tư vấn ngay",
-        ctaSecondaryUrl: initialData.cta_secondary_url || "/contact",
-        communityTitle: initialData.community_title || "Cộng đồng",
-        communityText: initialData.community_text || "Gia nhập cộng đồng HR",
-        internationalTitle: initialData.international_title || "Tiêu chuẩn quốc tế",
-        internationalText: initialData.international_text || "Chương trình đào tạo chuẩn quốc tế",
-      })
-      if (initialData.logo_url && !logoFile) setLogoPreview(initialData.logo_url)
-      if (initialData.banner_url && !bannerFile) setBannerPreview(initialData.banner_url)
-
-      try {
-         // Luôn fetch lại từ DB thật để đảm bảo không bị kẹt Router Cache cũ Next.js
-         const supabase = createClient()
-         const { data: freshData } = await supabase.from('center_info').select('*').single()
-         if (freshData) {
-            form.reset({
-              name: freshData.name || "",
-              slogan: freshData.slogan || "",
-              description: freshData.description || "",
-              address: freshData.address || "",
-              phone: freshData.phone || "",
-              email: freshData.email || "",
-              zaloUrl: freshData.zalo_url || "",
-              facebookUrl: freshData.facebook_url || "",
-              mapUrl: freshData.map_url || "",
-              statsCourses: Number(freshData.stats_courses ?? 50),
-              statsStudents: Number(freshData.stats_students ?? 12000),
-              statsRating: Number(freshData.stats_rating ?? 4.9),
-              showStats: Boolean(freshData.show_stats ?? false),
-              heroBadgeText: freshData.hero_badge_text || "Chào mừng bạn đến với EduCenter",
-              ctaPrimaryText: freshData.cta_primary_text || "Khám phá khóa học",
-              ctaSecondaryText: freshData.cta_secondary_text || "Tư vấn ngay",
-              ctaSecondaryUrl: freshData.cta_secondary_url || "/contact",
-              communityTitle: freshData.community_title || "Cộng đồng",
-              communityText: freshData.community_text || "Gia nhập cộng đồng HR",
-              internationalTitle: freshData.international_title || "Tiêu chuẩn quốc tế",
-              internationalText: freshData.international_text || "Chương trình đào tạo chuẩn quốc tế",
-            })
-            if (freshData.logo_url && !logoFile) setLogoPreview(freshData.logo_url)
-            if (freshData.banner_url && !bannerFile) setBannerPreview(freshData.banner_url)
-         }
-      } catch (err) {
-         console.error('Lỗi khi fetch data mới nhất:', err)
-      }
-    }
-    loadFreshData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    if (initialData?.logo_url && !logoFile) setLogoPreview(initialData.logo_url)
+    if (initialData?.banner_url && !bannerFile) setBannerPreview(initialData.banner_url)
+  }, [initialData, logoFile, bannerFile])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'banner') => {
     const file = e.target.files?.[0]
